@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Administración - Alma Estética</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #fce4ec;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { color: #c2185b; }
+    button {
+      background-color: #c2185b;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 10px 5px;
+    }
+    table {
+      margin: auto;
+      width: 95%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f8bbd0;
+      color: #880e4f;
+    }
+    .editar, .eliminar {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .editar { background: #c2185b; color: white; }
+    .eliminar { background: #b71c1c; color: white; }
+    footer {
+      margin-top: 40px;
+      color: #888;
+      font-size: 13px;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .modal-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideUp 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .modal-card input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .modal-card button {
+      padding: 10px;
+      font-size: 14px;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+  <h1>Administración de Turnos y Tratamientos</h1>
+  <div id="tablaTurnos"></div>
+  <h2>Lista de Tratamientos</h2>
+  <div id="tablaTratamientos"></div>
+  <div id="modalContainer"></div>
+  <footer>Design by Hugo Rivera</footer>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyVu4QS606lJZY-vLxBp29EGuRyGpWaNSjzkJZY_XosiOlGteOrEOmsqVngYvf2J49p/exec";
+
+    async function cargarTurnos() {
+      const res = await fetch(API_URL + "?hoja=1");
+      const datos = await res.json();
+      let html = `<table><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Profesional</th><th>Servicio</th><th>Fecha</th><th>Hora</th><th>Acciones</th></tr>`;
+      datos.forEach((fila, i) => {
+        if (i === 0) return; // saltar encabezado
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${fila.nombre || ''}</td>
+          <td>${fila.telefono || ''}</td>
+          <td>${fila.profesional || ''}</td>
+          <td>${fila.servicio || ''}</td>
+          <td>${fila.fecha || ''}</td>
+          <td>${fila.hora || ''}</td>
+          <td>
+            <button class="editar" onclick="mostrarModalEditarTurno(${i + 1})">Editar</button>
+            <button class="eliminar" onclick="eliminarTurno(${i + 1})">Eliminar</button>
+          </td>
+        </tr>`;
+      });
+      html += `</table>`;
+      document.getElementById("tablaTurnos").innerHTML = html;
+    }
+
+    async function cargarTratamientos() {
+      const res = await fetch(API_URL + "?hoja=2");
+      const datos = await res.json();
+      let html = `<table><tr><th>ID</th><th>Rubro</th><th>Subrubro</th><th>Duración</th><th>Precio</th><th>Acciones</th></tr>`;
+      datos.forEach((fila, i) => {
+        if (i === 0) return;
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${fila.Rubro || ''}</td>
+          <td>${fila.Subrubro || ''}</td>
+          <td>${fila.Duración || ''}</td>
+          <td>${fila.Precio || ''}</td>
+          <td>
+            <button class="editar" onclick="mostrarModalEditarTratamiento(${i + 1})">Editar</button>
+            <button class="eliminar" onclick="eliminarTratamiento(${i + 1})">Eliminar</button>
+          </td>
+        </tr>`;
+      });
+      html += `</table>`;
+      document.getElementById("tablaTratamientos").innerHTML = html;
+    }
+
+    function eliminarTurno(id) {
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ _method: "DELETE", id, fecha: true })
+      }).then(() => cargarTurnos());
+    }
+
+    function eliminarTratamiento(id) {
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ _method: "DELETE", id })
+      }).then(() => cargarTratamientos());
+    }
+
+    cargarTurnos();
+    cargarTratamientos();
+  </script>
+</body>
+</html>
