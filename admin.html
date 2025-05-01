@@ -114,8 +114,9 @@
           <td>${fila.telefono || ''}</td>
           <td>${fila.profesional || ''}</td>
           <td>${fila.servicio || ''}</td>
-          <td>${fila.fecha || ''}</td>
-          <td>${fila.hora || ''}</td>
+          <td>${formatearFecha(fila.fecha)}</td>
+<td>${formatearHora(fila.hora)}</td>
+
           <td>
             <button class="editar" onclick="mostrarModalEditarTurno(${i + 1})">Editar</button>
             <button class="eliminar" onclick="eliminarTurno(${i + 1})">Eliminar</button>
@@ -164,6 +165,18 @@
 
     cargarTurnos();
     cargarTratamientos();
+    function formatearFecha(fecha) {
+  if (!fecha) return '';
+  const f = new Date(fecha);
+  return isNaN(f) ? fecha : f.toISOString().slice(0, 10);
+}
+
+function formatearHora(hora) {
+  if (!hora) return '';
+  const h = new Date(hora);
+  return isNaN(h) ? hora : h.toTimeString().slice(0, 5);
+}
+
   </script>
 </body>
 </html>
