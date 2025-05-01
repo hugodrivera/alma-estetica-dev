@@ -148,7 +148,8 @@
         grupos[rubro].forEach(t => {
           const opcion = document.createElement("option");
           opcion.value = t.subrubro;
-          opcion.textContent = `${t.subrubro};
+          opcion.textContent = t.subrubro;
+
           optgroup.appendChild(opcion);
         });
 
